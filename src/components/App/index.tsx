@@ -10,11 +10,17 @@ import "./App.css"
 
 interface FormValues {
     name: string;
+    email: string;
+    password: string;
+    passwordConfirm: string;
     position: string;
 }
 
 const initialValues: FormValues = {
     name: '',
+    email: '',
+    password: '',
+    passwordConfirm: '',
     position: ''
 };
 
@@ -38,12 +44,44 @@ const positionItems: FormikSelectItem[] = [
     },
 ]
 
+
+// Here am trying to pretend that these email are on the db or is fetching from an api
+// so it will check if the email a user input is taken and if it is, it shots an error and if not it passes.
+
+const emailAddresses = [
+  'test@gmail.com',
+  'test2@gmail.com',
+  'test3@gmail.com'
+];
+
+// lowercase Regex variable for readablity
+const lowercaseRegex = /(?=.*[a-z])/;
+// uppercase Regex variable for readability
+const uppercaseRegex = /(?=.*[A-Z])/;
+// numeric Regex variable for readability
+const numericRegex = /(?=.*[0-9])/;
+
+
 const SignupSchema = Yup.object().shape({
     name: Yup.string()
         .min(2, 'Too Short!')
-        .required('Required'),
+        .required('Required!'),
+    email: Yup.string()
+        .lowercase()
+        .email('Must be a valid email!')
+        .notOneOf(emailAddresses, 'Email already taken!')
+        .required('Required!'),
+    password: Yup.string()
+        .matches(lowercaseRegex, 'One lowercase required!')
+        .matches(uppercaseRegex, 'One uppercase required!')
+        .matches(numericRegex, 'One number required!')
+        .min(8, 'Minimum 8 characters required!')
+        .required('Required!'),
+    passwordConfirm: Yup.string()
+        .oneOf([Yup.ref('password')], 'Password do not match') 
+        .required('Required!'),
     position: Yup.string()
-        .required('Required')
+        .required('Required!')
 });
 
 
@@ -63,7 +101,28 @@ const App: React.FC = () => {
             {({dirty, isValid}) => {
                 return (
                     <Form>
-                        <FormikField name="name" label="Name" required/>
+                        <FormikField 
+                        name="name" 
+                        label="Name" 
+                        required
+                        />
+                        <FormikField 
+                        name="email" 
+                        label="Email" 
+                        required
+                        />
+                        <FormikField 
+                        name="password" 
+                        label="Password" 
+                        required 
+                        type="password"
+                        />
+                        <FormikField 
+                        name="passwordConfirm" 
+                        label="Confirm Password" 
+                        required 
+                        type="password"
+                        />
 
                       {/* passing a props*/}
                         <FormikSelect name="position" items={positionItems} label="Position" required/>
